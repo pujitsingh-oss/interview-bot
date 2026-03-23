@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruiter Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #F0F4F8;
+  --surface: #FFFFFF;
+  --surface2: #F8FAFC;
+  --border: #E2E8F0;
+  --accent: #D97706;
+  --accent-light: #FEF3C7;
+  --text: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --hire: #059669;
+  --hire-bg: #ECFDF5;
+  --consider: #D97706;
+  --consider-bg: #FFFBEB;
+  --reject: #DC2626;
+  --reject-bg: #FEF2F2;
+  --r: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* ── LAYOUT ── */
+.layout { display:flex; min-height:100vh; }
+.sidebar {
+  width:220px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:24px 0;
+  display:flex;
+  flex-direction:column;
+  position:fixed;
+  top:0; left:0; bottom:0;
+  z-index:10;
+}
+.main { margin-left:220px; flex:1; padding:32px; }
+
+/* ── SIDEBAR ── */
+.sidebar-brand {
+  padding:0 20px 24px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:16px;
+}
+.sidebar-logo {
+  display:flex; align-items:center; gap:10px; margin-bottom:4px;
+}
+.logo-dot {
+  width:30px; height:30px;
+  background:#0F172A;
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+}
+.logo-dot svg { width:16px; height:16px; }
+.sidebar-title { font-size:15px; font-weight:700; }
+.sidebar-sub { font-size:12px; color:var(--text-muted); }
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 20px;
+  cursor:pointer;
+  color:var(--text-secondary);
+  font-size:13px; font-weight:500;
+  border-left:3px solid transparent;
+  transition:all 0.15s;
+}
+.nav-item:hover { background:var(--bg); color:var(--text); }
+.nav-item.active { border-left-color:var(--accent); color:var(--accent); background:var(--accent-light); }
+.nav-item svg { width:16px; height:16px; flex-shrink:0; }
+.sidebar-footer { margin-top:auto; padding:16px 20px; border-top:1px solid var(--border); }
+.config-btn {
+  width:100%; padding:9px 14px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px; font-weight:500;
+  color:var(--text-secondary);
+  cursor:pointer;
+  text-align:left;
+  display:flex; align-items:center; gap:8px;
+}
+.config-btn:hover { background:var(--border); }
+
+/* ── TOP BAR ── */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:28px;
+}
+.page-title { font-size:22px; font-weight:700; }
+.page-sub { font-size:13px; color:var(--text-muted); margin-top:2px; }
+.topbar-actions { display:flex; gap:10px; align-items:center; }
+.btn-sm {
+  padding:8px 16px;
+  border-radius:8px;
+  border:none;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px; font-weight:500;
+  cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+  transition:all 0.15s;
+}
+.btn-sm:active { transform:scale(0.97); }
+.btn-outline { background:var(--surface); border:1px solid var(--border); color:var(--text-secondary); }
+.btn-outline:hover { background:var(--bg); }
+.btn-accent { background:var(--accent); color:#fff; }
+.btn-accent:hover { background:#B45309; }
+
+/* ── STAT CARDS ── */
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+.stat-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:20px;
+  box-shadow:var(--shadow);
+}
+.stat-label { font-size:12px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; }
+.stat-value { font-size:28px; font-weight:700; line-height:1; margin-bottom:4px; }
+.stat-change { font-size:12px; color:var(--text-muted); }
+.stat-change.up { color:var(--hire); }
+.stat-change.down { color:var(--reject); }
+
+/* ── CHARTS ROW ── */
+.charts-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:28px; }
+.chart-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:20px;
+  box-shadow:var(--shadow);
+}
+.chart-title { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:16px; text-transform:uppercase; letter-spacing:0.04em; }
+.chart-wrap { position:relative; height:180px; }
+
+/* ── FILTERS ── */
+.filter-row {
+  display:flex; gap:10px; align-items:center;
+  margin-bottom:16px; flex-wrap:wrap;
+}
+.filter-select {
+  padding:8px 12px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  color:var(--text);
+  cursor:pointer;
+  outline:none;
+}
+.filter-select:focus { border-color:var(--accent); }
+.search-box {
+  flex:1; min-width:180px; max-width:280px;
+  padding:8px 12px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  color:var(--text);
+  outline:none;
+}
+.search-box:focus { border-color:var(--accent); }
+
+/* ── TABLE ── */
+.table-wrap {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+table { width:100%; border-collapse:collapse; }
+thead th {
+  padding:11px 16px;
+  text-align:left;
+  font-size:11px; font-weight:600;
+  color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:0.06em;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody tr { border-bottom:1px solid var(--border); transition:background 0.1s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:var(--bg); cursor:pointer; }
+tbody td {
+  padding:13px 16px;
+  font-size:13px;
+  vertical-align:middle;
+}
+.td-name { font-weight:500; color:var(--text); }
+.td-phone { color:var(--text-secondary); font-family:monospace; font-size:12px; }
+.td-score {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:28px; height:28px;
+  border-radius:6px;
+  font-size:12px; font-weight:600;
+}
+.score-bar-wrap { width:80px; background:var(--border); border-radius:3px; height:5px; }
+.score-bar-fill { height:100%; border-radius:3px; background:var(--accent); }
+
+/* ── BADGES ── */
+.badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 10px;
+  border-radius:100px;
+  font-size:12px; font-weight:500;
+  letter-spacing:0.02em;
+}
+.badge-hire { background:var(--hire-bg); color:var(--hire); }
+.badge-consider { background:var(--consider-bg); color:var(--consider); }
+.badge-reject { background:var(--reject-bg); color:var(--reject); }
+.badge-dot { width:6px; height:6px; border-radius:50%; }
+.badge-hire .badge-dot { background:var(--hire); }
+.badge-consider .badge-dot { background:var(--consider); }
+.badge-reject .badge-dot { background:var(--reject); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display:none;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.35);
+  z-index:50;
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--surface);
+  border-radius:16px;
+  padding:28px;
+  width:90%; max-width:560px;
+  max-height:85vh;
+  overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.15);
+}
+.modal-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+.modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted); padding:4px; }
+.modal-close:hover { color:var(--text); }
+.score-row { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.score-item {
+  flex:1; min-width:100px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  text-align:center;
+}
+.score-item-val { font-size:22px; font-weight:700; color:var(--accent); }
+.score-item-label { font-size:11px; color:var(--text-muted); margin-top:2px; text-transform:uppercase; letter-spacing:0.04em; }
+.transcript-msg { padding:10px 14px; border-radius:8px; margin-bottom:8px; font-size:13px; line-height:1.6; }
+.transcript-ai { background:var(--surface2); border-left:3px solid var(--accent); }
+.transcript-user { background:var(--hire-bg); border-left:3px solid var(--hire); }
+.msg-label { font-size:11px; font-weight:600; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align:center;
+  padding:60px 20px;
+  color:var(--text-secondary);
+}
+.empty-state h3 { font-size:16px; margin-bottom:8px; color:var(--text); }
+.empty-state p { font-size:14px; color:var(--text-muted); }
+
+/* ── CONFIG PANEL ── */
+.config-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:60; align-items:center; justify-content:center; }
+.config-overlay.open { display:flex; }
+.config-modal { background:var(--surface); border-radius:16px; padding:28px; width:90%; max-width:480px; }
+.config-modal h3 { font-size:17px; font-weight:600; margin-bottom:4px; }
+.config-modal p { font-size:13px; color:var(--text-muted); margin-bottom:20px; }
+.config-field { margin-bottom:16px; }
+.config-field label { font-size:12px; font-weight:500; color:var(--text-secondary); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em; }
+.config-field input {
+  width:100%; padding:10px 12px;
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:8px;
+  font-family:'DM Sans',sans-serif; font-size:14px;
+  color:var(--text); outline:none;
+}
+.config-field input:focus { border-color:var(--accent); }
+
+@media (max-width:1100px) {
+  .charts-grid { grid-template-columns:1fr 1fr; }
+  .charts-grid .chart-card:last-child { grid-column:span 2; }
+}
+@media (max-width:800px) {
+  .sidebar { display:none; }
+  .main { margin-left:0; padding:16px; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .charts-grid { grid-template-columns:1fr; }
+  .charts-grid .chart-card:last-child { grid-column:auto; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">
+      <div class="logo-dot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="sidebar-title" id="sb-company">TalentFirst</span>
+    </div>
+    <div class="sidebar-sub">Recruiter Dashboard</div>
+  </div>
+  <nav>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </div>
+    <div class="nav-item" onclick="scrollToTable()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Candidates
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="config-btn" onclick="openConfig()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Interview Overview</div>
+      <div class="page-sub" id="last-updated">Loading data...</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm btn-outline" onclick="loadData()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Refresh
+      </button>
+      <button class="btn-sm btn-accent" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Interviews</div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-change" id="stat-total-sub">All time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Hire Rate</div>
+      <div class="stat-value" id="stat-hire-rate" style="color:var(--hire)">0%</div>
+      <div class="stat-change" id="stat-hire-sub">Recommended to hire</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Total Score</div>
+      <div class="stat-value" id="stat-avg-score" style="color:var(--accent)">0</div>
+      <div class="stat-change">out of 20</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Languages</div>
+      <div class="stat-value" id="stat-langs">0</div>
+      <div class="stat-change" id="stat-langs-sub">distinct languages</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Recommendation breakdown</div>
+      <div class="chart-wrap"><canvas id="chart-donut"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Avg scores by dimension</div>
+      <div class="chart-wrap"><canvas id="chart-scores"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Interviews by language</div>
+      <div class="chart-wrap"><canvas id="chart-langs"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CANDIDATES TABLE -->
+  <div id="candidates-section">
+    <div class="filter-row">
+      <input type="text" class="search-box" id="search-box" placeholder="Search by name or phone..." oninput="renderTable()">
+      <select class="filter-select" id="filter-rec" onchange="renderTable()">
+        <option value="">All recommendations</option>
+        <option value="hire">Hire</option>
+        <option value="consider">Consider</option>
+        <option value="reject">Reject</option>
+      </select>
+      <select class="filter-select" id="filter-lang" onchange="renderTable()">
+        <option value="">All languages</option>
+      </select>
+      <select class="filter-select" id="filter-sort" onchange="renderTable()">
+        <option value="newest">Newest first</option>
+        <option value="score-desc">Highest score</option>
+        <option value="score-asc">Lowest score</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Language</th>
+            <th>Communication</th>
+            <th>Experience</th>
+            <th>Motivation</th>
+            <th>Reliability</th>
+            <th>Total</th>
+            <th>Result</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <h3>No interviews yet</h3>
+        <p>Interviews conducted on this device will appear here automatically.<br>
+        Share the <code>interview.html</code> link with candidates to get started.</p>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:8px;text-align:right;" id="result-count"></div>
+  </div>
+</main>
+
+</div><!-- .layout -->
+
+<!-- ── CANDIDATE MODAL ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-name" style="font-size:18px;font-weight:700;"></h3>
+        <div id="modal-meta" style="font-size:13px;color:var(--text-muted);margin-top:4px;"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="score-row" id="modal-scores"></div>
+    <div id="modal-rec" style="margin-bottom:20px;"></div>
+    <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Interview Transcript</div>
+    <div id="modal-transcript"></div>
+  </div>
+</div>
+
+<!-- ── CONFIG MODAL ── -->
+<div class="config-overlay" id="config-overlay" onclick="closeConfigOverlay(event)">
+  <div class="config-modal">
+    <h3>Dashboard Settings</h3>
+    <p>Configure your company name and optional webhook URL to receive data from interviews on other devices.</p>
+    <div class="config-field">
+      <label>Company Name</label>
+      <input type="text" id="cfg-company" placeholder="Your Company">
+    </div>
+    <div class="config-field">
+      <label>Webhook URL <span style="font-size:11px;text-transform:none;color:var(--text-muted)">(Google Apps Script — optional)</span></label>
+      <input type="url" id="cfg-webhook" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn-sm btn-accent" style="flex:1" onclick="saveConfig()">Save</button>
+      <button class="btn-sm btn-outline" onclick="document.getElementById('config-overlay').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// State
+let allResults = [];
+let donutChart, scoresChart, langsChart;
+
+const SAMPLE_DATA = [
+  { id:'INV-SMP001', timestamp: new Date(Date.now()-86400000*2).toISOString(), candidate:{name:'Rahul Sharma',phone:'9876543210',jobCode:'SALES-MUM-01'}, language:'Hindi', scores:{communication:4,experience:3,motivation:5,reliability:4}, totalScore:16, recommendation:'hire', transcript:[] },
+  { id:'INV-SMP002', timestamp: new Date(Date.now()-86400000*1).toISOString(), candidate:{name:'Priya Nair',phone:'8765432109',jobCode:'SALES-MUM-01'}, language:'Tamil', scores:{communication:3,experience:2,motivation:4,reliability:3}, totalScore:12, recommendation:'consider', transcript:[] },
+  { id:'INV-SMP003', timestamp: new Date(Date.now()-3600000*5).toISOString(), candidate:{name:'Arjun Reddy',phone:'7654321098',jobCode:'SALES-HYD-02'}, language:'Telugu', scores:{communication:2,experience:1,motivation:2,reliability:2}, totalScore:7, recommendation:'reject', transcript:[] },
+  { id:'INV-SMP004', timestamp: new Date(Date.now()-3600000*2).toISOString(), candidate:{name:'Sunita Devi',phone:'6543210987',jobCode:'SALES-MUM-01'}, language:'Hindi', scores:{communication:5,experience:4,motivation:5,reliability:5}, totalScore:19, recommendation:'hire', transcript:[] },
+  { id:'INV-SMP005', timestamp: new Date(Date.now()-3600000*1).toISOString(), candidate:{name:'Karthik M',phone:'9988776655',jobCode:'SALES-CHE-03'}, language:'Tamil', scores:{communication:4,experience:4,motivation:3,reliability:4}, totalScore:15, recommendation:'hire', transcript:[] },
+];
+
+function loadData() {
+  let stored = [];
+  try { stored = JSON.parse(localStorage.getItem('interview_results') || '[]'); } catch(e){}
+  allResults = stored.length ? stored : SAMPLE_DATA;
+  renderAll();
+  document.getElementById('last-updated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+}
+
+function renderAll() {
+  renderStats();
+  renderCharts();
+  renderTable();
+  populateLangFilter();
+}
+
+function renderStats() {
+  const n = allResults.length;
+  const hires = allResults.filter(r => r.recommendation === 'hire').length;
+  const avgScore = n ? (allResults.reduce((a,r) => a + (r.totalScore||0), 0) / n).toFixed(1) : 0;
+  const langs = [...new Set(allResults.map(r => r.language))];
+
+  document.getElementById('stat-total').textContent = n;
+  document.getElementById('stat-hire-rate').textContent = n ? Math.round(hires/n*100) + '%' : '0%';
+  document.getElementById('stat-avg-score').textContent = avgScore;
+  document.getElementById('stat-langs').textContent = langs.length;
+  document.getElementById('stat-total-sub').textContent = n === 1 ? '1 interview completed' : n + ' interviews completed';
+  document.getElementById('stat-hire-sub').textContent = hires + ' of ' + n + ' recommended';
+  document.getElementById('stat-langs-sub').textContent = langs.join(', ') || '—';
+}
+
+function renderCharts() {
+  const n = allResults.length;
+  const hires = allResults.filter(r => r.recommendation === 'hire').length;
+  const considers = allResults.filter(r => r.recommendation === 'consider').length;
+  const rejects = allResults.filter(r => r.recommendation === 'reject').length;
+
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(document.getElementById('chart-donut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Hire', 'Consider', 'Reject'],
+      datasets: [{ data: [hires, considers, rejects], backgroundColor: ['#059669','#D97706','#DC2626'], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: { legend: { position: 'bottom', labels: { font:{family:'DM Sans',size:12}, padding:12, boxWidth:10 } } }
+    }
+  });
+
+  const dims = ['communication','experience','motivation','reliability'];
+  const avgByDim = dims.map(d => n ? +(allResults.reduce((a,r) => a + (r.scores?.[d]||0), 0) / n).toFixed(2) : 0);
+
+  if (scoresChart) scoresChart.destroy();
+  scoresChart = new Chart(document.getElementById('chart-scores'), {
+    type: 'bar',
+    data: {
+      labels: ['Communication','Experience','Motivation','Reliability'],
+      datasets: [{ data: avgByDim, backgroundColor: ['#F59E0B88','#D9770688','#10B98188','#60A5FA88'], borderColor:['#F59E0B','#D97706','#10B981','#60A5FA'], borderWidth:1.5, borderRadius:6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend:{display:false} },
+      scales: {
+        x: { min:0, max:5, ticks:{stepSize:1,font:{family:'DM Sans',size:11}}, grid:{color:'#F1F5F8'} },
+        y: { ticks:{font:{family:'DM Sans',size:11}}, grid:{display:false} }
+      }
+    }
+  });
+
+  const langCounts = {};
+  allResults.forEach(r => { langCounts[r.language] = (langCounts[r.language]||0) + 1; });
+  const langColors = ['#F59E0B','#10B981','#60A5FA','#A78BFA','#F87171','#34D399'];
+
+  if (langsChart) langsChart.destroy();
+  langsChart = new Chart(document.getElementById('chart-langs'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(langCounts),
+      datasets: [{ data: Object.values(langCounts), backgroundColor: langColors, borderRadius:6, borderSkipped:false }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ticks:{font:{family:'DM Sans',size:11}}, grid:{display:false}},
+        y:{ticks:{stepSize:1,font:{family:'DM Sans',size:11}}, grid:{color:'#F1F5F8'}}
+      }
+    }
+  });
+}
+
+function populateLangFilter() {
+  const langs = [...new Set(allResults.map(r => r.language))].sort();
+  const sel = document.getElementById('filter-lang');
+  sel.innerHTML = '<option value="">All languages</option>';
+  langs.forEach(l => sel.innerHTML += `<option value="${l}">${l}</option>`);
+}
+
+function renderTable() {
+  const query = document.getElementById('search-box').value.toLowerCase();
+  const rec = document.getElementById('filter-rec').value;
+  const lang = document.getElementById('filter-lang').value;
+  const sort = document.getElementById('filter-sort').value;
+
+  let filtered = allResults.filter(r => {
+    const matchQuery = !query || r.candidate.name.toLowerCase().includes(query) || r.candidate.phone.includes(query);
+    const matchRec = !rec || r.recommendation === rec;
+    const matchLang = !lang || r.language === lang;
+    return matchQuery && matchRec && matchLang;
+  });
+
+  if (sort === 'newest') filtered.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  else if (sort === 'score-desc') filtered.sort((a,b) => (b.totalScore||0) - (a.totalScore||0));
+  else filtered.sort((a,b) => (a.totalScore||0) - (b.totalScore||0));
+
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+
+  document.getElementById('result-count').textContent = filtered.length + ' of ' + allResults.length + ' candidates';
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map((r,i) => {
+    const d = new Date(r.timestamp);
+    const dateStr = d.toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'2-digit'});
+    const s = r.scores || {};
+    const total = r.totalScore || 0;
+    const pct = Math.round((total/20)*100);
+    return `<tr onclick="openModal('${r.id}')">
+      <td><div class="td-name">${r.candidate.name}</div><div class="td-phone">${r.candidate.phone}</div></td>
+      <td><span style="font-size:13px;">${r.language}</span></td>
+      <td><span class="td-score" style="background:${scoreBg(s.communication)};color:${scoreColor(s.communication)}">${s.communication||'-'}</span></td>
+      <td><span class="td-score" style="background:${scoreBg(s.experience)};color:${scoreColor(s.experience)}">${s.experience||'-'}</span></td>
+      <td><span class="td-score" style="background:${scoreBg(s.motivation)};color:${scoreColor(s.motivation)}">${s.motivation||'-'}</span></td>
+      <td><span class="td-score" style="background:${scoreBg(s.reliability)};color:${scoreColor(s.reliability)}">${s.reliability||'-'}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-weight:600;min-width:22px;">${total}</span>
+          <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%;background:${total>=14?'var(--hire)':total>=9?'var(--accent)':'var(--reject)'}"></div></div>
+        </div>
+      </td>
+      <td><span class="badge badge-${r.recommendation}"><span class="badge-dot"></span>${capitalize(r.recommendation)}</span></td>
+      <td style="color:var(--text-muted);white-space:nowrap;">${dateStr}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(id) {
+  const r = allResults.find(x => x.id === id);
+  if (!r) return;
+  const s = r.scores || {};
+  const d = new Date(r.timestamp);
+  document.getElementById('modal-name').textContent = r.candidate.name;
+  document.getElementById('modal-meta').textContent =
+    r.candidate.phone + ' · ' + r.language + ' · ' + r.candidate.jobCode + ' · ' + d.toLocaleString('en-IN');
+
+  document.getElementById('modal-scores').innerHTML = [
+    ['Communication', s.communication], ['Experience', s.experience],
+    ['Motivation', s.motivation], ['Reliability', s.reliability]
+  ].map(([label, val]) => `<div class="score-item">
+    <div class="score-item-val" style="color:${scoreColor(val)}">${val||0}/5</div>
+    <div class="score-item-label">${label}</div>
+  </div>`).join('');
+
+  document.getElementById('modal-rec').innerHTML =
+    `<span class="badge badge-${r.recommendation}" style="font-size:14px;padding:6px 14px;">
+      <span class="badge-dot"></span>Recommended: ${capitalize(r.recommendation)}
+    </span> <span style="font-size:13px;color:var(--text-muted);margin-left:8px;">Total: ${r.totalScore||0}/20</span>`;
+
+  const tx = (r.transcript || []).filter(m => m.content && m.content !== 'Start the interview.');
+  document.getElementById('modal-transcript').innerHTML = tx.length
+    ? tx.map(m => `<div class="transcript-msg ${m.role==='assistant'?'transcript-ai':'transcript-user'}">
+        <div class="msg-label">${m.role === 'assistant' ? 'Interviewer' : r.candidate.name.split(' ')[0]}</div>
+        ${parseTranscriptMsg(m.content)}
+      </div>`).join('')
+    : '<p style="color:var(--text-muted);font-size:13px;">Transcript not available (sample data)</p>';
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function parseTranscriptMsg(content) {
+  try {
+    const j = JSON.parse(content);
+    return j.message || content;
+  } catch(e) { return content; }
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// CONFIG
+function openConfig() {
+  const saved = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
+  document.getElementById('cfg-company').value = saved.companyName || '';
+  document.getElementById('cfg-webhook').value = saved.webhookUrl || '';
+  document.getElementById('config-overlay').classList.add('open');
+}
+function closeConfigOverlay(e) {
+  if (e.target === document.getElementById('config-overlay'))
+    document.getElementById('config-overlay').classList.remove('open');
+}
+function saveConfig() {
+  const cfg = {
+    companyName: document.getElementById('cfg-company').value,
+    webhookUrl: document.getElementById('cfg-webhook').value
+  };
+  localStorage.setItem('dashboard_config', JSON.stringify(cfg));
+  if (cfg.companyName) document.getElementById('sb-company').textContent = cfg.companyName;
+  document.getElementById('config-overlay').classList.remove('open');
+}
+
+// HELPERS
+function scoreBg(v) {
+  if (!v) return '#F1F5F9';
+  if (v >= 4) return '#ECFDF5';
+  if (v >= 3) return '#FFFBEB';
+  return '#FEF2F2';
+}
+function scoreColor(v) {
+  if (!v) return '#94A3B8';
+  if (v >= 4) return '#059669';
+  if (v >= 3) return '#D97706';
+  return '#DC2626';
+}
+function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+function scrollToTable() { document.getElementById('candidates-section').scrollIntoView({behavior:'smooth'}); }
+
+// EXPORT
+function exportCSV() {
+  const headers = ['ID','Name','Phone','Job Code','Language','Communication','Experience','Motivation','Reliability','Total','Recommendation','Date'];
+  const rows = allResults.map(r => [
+    r.id, r.candidate.name, r.candidate.phone, r.candidate.jobCode,
+    r.language, r.scores?.communication, r.scores?.experience,
+    r.scores?.motivation, r.scores?.reliability, r.totalScore,
+    r.recommendation, new Date(r.timestamp).toLocaleString('en-IN')
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v||''}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = 'interviews-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// INIT
+const savedCfg = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
+if (savedCfg.companyName) document.getElementById('sb-company').textContent = savedCfg.companyName;
+loadData();
+setInterval(loadData, 30000); // auto-refresh every 30s
+</script>
+</body>
+</html>

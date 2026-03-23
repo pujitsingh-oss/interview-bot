@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Interview</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080D1A;
+  --surface: #111827;
+  --surface2: #1F2937;
+  --accent: #F59E0B;
+  --accent-glow: rgba(245,158,11,0.2);
+  --green: #10B981;
+  --red: #F87171;
+  --blue: #60A5FA;
+  --text: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --text-muted: #4B5563;
+  --border: rgba(255,255,255,0.07);
+  --r: 14px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; background:var(--bg); }
+body {
+  font-family:'Outfit',sans-serif;
+  color:var(--text);
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  min-height:100dvh;
+}
+.app {
+  width:100%;
+  max-width:440px;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display:none;
+  flex-direction:column;
+  flex:1;
+  padding:32px 24px 40px;
+  animation:fadeUp 0.35s ease;
+}
+.screen.active { display:flex; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── SETUP NOTICE ── */
+#setup-notice {
+  background:#1C1300;
+  border:1px solid var(--accent);
+  border-radius:var(--r);
+  padding:16px;
+  margin-bottom:24px;
+  font-size:13px;
+  color:#FCD34D;
+  line-height:1.6;
+}
+#setup-notice strong { display:block; margin-bottom:4px; color:var(--accent); font-size:14px; }
+#setup-notice.hidden { display:none; }
+
+/* ── LOGO / BRAND ── */
+.brand {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:40px;
+}
+.brand-dot {
+  width:36px; height:36px;
+  background:var(--accent);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.brand-dot svg { width:20px; height:20px; }
+.brand-name { font-size:18px; font-weight:600; }
+.brand-sub { font-size:12px; color:var(--text-secondary); margin-top:1px; }
+
+/* ── HEADINGS ── */
+h1 { font-size:28px; font-weight:700; line-height:1.25; margin-bottom:8px; }
+h2 { font-size:22px; font-weight:600; line-height:1.3; margin-bottom:8px; }
+.subtitle { font-size:15px; color:var(--text-secondary); line-height:1.6; margin-bottom:32px; }
+
+/* ── LANGUAGE GRID ── */
+.lang-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+.lang-btn {
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--r);
+  padding:18px 14px;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-align:center;
+}
+.lang-btn:active { transform:scale(0.97); }
+.lang-btn.selected {
+  border-color:var(--accent);
+  background:var(--accent-glow);
+}
+.lang-native { font-size:20px; font-weight:600; display:block; margin-bottom:4px; }
+.lang-english { font-size:12px; color:var(--text-secondary); }
+
+/* ── FORM ── */
+.form-group { margin-bottom:20px; }
+label { font-size:13px; color:var(--text-secondary); display:block; margin-bottom:8px; font-weight:500; letter-spacing:0.03em; text-transform:uppercase; }
+input {
+  width:100%;
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--r);
+  padding:15px 16px;
+  font-family:'Outfit',sans-serif;
+  font-size:16px;
+  color:var(--text);
+  outline:none;
+  transition:border-color 0.2s;
+}
+input:focus { border-color:var(--accent); }
+input::placeholder { color:var(--text-muted); }
+
+/* ── BUTTONS ── */
+.btn {
+  width:100%;
+  padding:17px;
+  border-radius:var(--r);
+  border:none;
+  font-family:'Outfit',sans-serif;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  letter-spacing:0.01em;
+}
+.btn:active { transform:scale(0.98); }
+.btn-primary { background:var(--accent); color:#000; }
+.btn-secondary { background:var(--surface2); color:var(--text); border:1.5px solid var(--border); }
+
+/* ── INSTRUCTIONS ── */
+.instruction-list { list-style:none; margin-bottom:auto; }
+.instruction-list li {
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:16px 0;
+  border-bottom:1px solid var(--border);
+}
+.instruction-list li:last-child { border-bottom:none; }
+.inst-num {
+  width:28px; height:28px;
+  background:var(--accent-glow);
+  border:1px solid var(--accent);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  font-weight:600;
+  color:var(--accent);
+  flex-shrink:0;
+  margin-top:1px;
+}
+.inst-text { font-size:15px; line-height:1.6; color:var(--text-secondary); }
+.inst-text strong { color:var(--text); font-weight:500; }
+
+/* ── INTERVIEW SCREEN ── */
+.progress-bar-wrap {
+  height:3px;
+  background:var(--surface2);
+  border-radius:2px;
+  margin-bottom:32px;
+  overflow:hidden;
+}
+.progress-bar-fill {
+  height:100%;
+  background:var(--accent);
+  border-radius:2px;
+  transition:width 0.5s ease;
+  width:0%;
+}
+.q-counter {
+  font-size:12px;
+  color:var(--text-muted);
+  text-align:right;
+  margin-top:6px;
+  letter-spacing:0.05em;
+}
+
+.ai-bubble {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:20px;
+  font-size:17px;
+  line-height:1.65;
+  min-height:100px;
+  flex:1;
+  margin-bottom:24px;
+  position:relative;
+}
+.ai-bubble.thinking {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.think-dot {
+  width:8px; height:8px;
+  background:var(--text-muted);
+  border-radius:50%;
+  animation:blink 1.2s infinite;
+}
+.think-dot:nth-child(2) { animation-delay:0.2s; }
+.think-dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes blink {
+  0%,80%,100% { opacity:0.2; }
+  40% { opacity:1; }
+}
+
+.speaker-state {
+  font-size:12px;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:8px;
+}
+.speaker-dot {
+  width:6px; height:6px;
+  background:var(--accent);
+  border-radius:50%;
+  animation:pulse 1s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.4; transform:scale(0.8); }
+}
+
+.user-response-area {
+  margin-bottom:24px;
+  min-height:70px;
+}
+.transcript-text {
+  font-size:15px;
+  color:var(--text-secondary);
+  font-style:italic;
+  line-height:1.6;
+  padding:14px 16px;
+  background:var(--surface);
+  border-radius:10px;
+  border-left:3px solid var(--blue);
+}
+
+/* ── MIC BUTTON ── */
+.mic-container {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  padding:16px 0 8px;
+}
+.mic-btn {
+  width:80px; height:80px;
+  border-radius:50%;
+  background:var(--surface2);
+  border:2px solid var(--border);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+  position:relative;
+}
+.mic-btn:active { transform:scale(0.94); }
+.mic-btn.listening {
+  background:var(--accent-glow);
+  border-color:var(--accent);
+  animation:mic-pulse 1.5s infinite;
+}
+.mic-btn.disabled {
+  opacity:0.3;
+  pointer-events:none;
+}
+@keyframes mic-pulse {
+  0%,100% { box-shadow:0 0 0 0 var(--accent-glow); }
+  50% { box-shadow:0 0 0 16px transparent; }
+}
+.mic-btn svg { width:32px; height:32px; }
+.mic-label {
+  font-size:13px;
+  color:var(--text-secondary);
+  font-weight:500;
+  letter-spacing:0.02em;
+}
+
+/* ── PROCESSING SCREEN ── */
+#screen-processing {
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:24px;
+}
+.spinner {
+  width:56px; height:56px;
+  border:3px solid var(--surface2);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── COMPLETE SCREEN ── */
+#screen-complete {
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.complete-icon {
+  width:72px; height:72px;
+  background:rgba(16,185,129,0.15);
+  border:2px solid var(--green);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:24px;
+}
+.complete-icon svg { width:36px; height:36px; color:var(--green); }
+.ref-id {
+  font-size:12px;
+  color:var(--text-muted);
+  font-family:monospace;
+  background:var(--surface);
+  padding:8px 14px;
+  border-radius:8px;
+  margin-top:16px;
+  letter-spacing:0.1em;
+}
+
+/* ── ERROR TOAST ── */
+#error-toast {
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#1C0A0A;
+  border:1px solid var(--red);
+  color:var(--red);
+  padding:12px 18px;
+  border-radius:10px;
+  font-size:14px;
+  z-index:100;
+  transition:transform 0.3s;
+  white-space:nowrap;
+  max-width:90vw;
+}
+#error-toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ── UTILS ── */
+.spacer { flex:1; }
+.mt-auto { margin-top:auto; }
+.gap-12 { gap:12px; }
+.flex-col { display:flex; flex-direction:column; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ───── SCREEN 0: LANGUAGE ───── -->
+<div class="screen active" id="screen-lang">
+  <div id="setup-notice" class="hidden">
+    <strong>⚙️ Setup Required</strong>
+    Open this file and add your Gemini API key to the CONFIG section at the top of the &lt;script&gt; tag.
+  </div>
+  <div class="brand">
+    <div class="brand-dot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name" id="company-name-display">Interview</div>
+      <div class="brand-sub" id="job-title-display">Screening</div>
+    </div>
+  </div>
+
+  <h1>Choose your<br>language</h1>
+  <p class="subtitle">अपनी भाषा चुनें • உங்கள் மொழி தேர்ந்தெடுக்கவும்</p>
+
+  <div class="lang-grid">
+    <button class="lang-btn" onclick="selectLanguage('hi-IN','Hindi','हिंदी')">
+      <span class="lang-native">हिंदी</span>
+      <span class="lang-english">Hindi</span>
+    </button>
+    <button class="lang-btn" onclick="selectLanguage('ta-IN','Tamil','தமிழ்')">
+      <span class="lang-native">தமிழ்</span>
+      <span class="lang-english">Tamil</span>
+    </button>
+    <button class="lang-btn" onclick="selectLanguage('te-IN','Telugu','తెలుగు')">
+      <span class="lang-native">తెలుగు</span>
+      <span class="lang-english">Telugu</span>
+    </button>
+    <button class="lang-btn" onclick="selectLanguage('bn-IN','Bengali','বাংলা')">
+      <span class="lang-native">বাংলা</span>
+      <span class="lang-english">Bengali</span>
+    </button>
+    <button class="lang-btn" onclick="selectLanguage('mr-IN','Marathi','मराठी')">
+      <span class="lang-native">मराठी</span>
+      <span class="lang-english">Marathi</span>
+    </button>
+    <button class="lang-btn" onclick="selectLanguage('en-IN','English','English')">
+      <span class="lang-native">English</span>
+      <span class="lang-english">English</span>
+    </button>
+  </div>
+
+  <div class="mt-auto" style="padding-top:24px;">
+    <button class="btn btn-primary" id="lang-next-btn" onclick="goTo('screen-info')" disabled style="opacity:0.4; cursor:not-allowed;">
+      Continue →
+    </button>
+  </div>
+</div>
+
+<!-- ───── SCREEN 1: CANDIDATE INFO ───── -->
+<div class="screen" id="screen-info">
+  <div class="brand">
+    <div class="brand-dot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name" id="company-name-display2">Interview</div>
+    </div>
+  </div>
+
+  <h2>Your details</h2>
+  <p class="subtitle">Please enter your information to begin.</p>
+
+  <div class="form-group">
+    <label>Full Name</label>
+    <input type="text" id="inp-name" placeholder="e.g. Rahul Sharma" autocomplete="name" autocorrect="off">
+  </div>
+  <div class="form-group">
+    <label>Phone Number</label>
+    <input type="tel" id="inp-phone" placeholder="e.g. 9876543210" inputmode="numeric" maxlength="10">
+  </div>
+  <div class="form-group">
+    <label>Job Code <span style="color:var(--text-muted);font-size:11px;text-transform:none;">(from your invite)</span></label>
+    <input type="text" id="inp-jobcode" placeholder="e.g. SALES-MUM-01" autocomplete="off" autocorrect="off" autocapitalize="characters">
+  </div>
+
+  <div class="mt-auto flex-col gap-12">
+    <button class="btn btn-primary" onclick="submitInfo()">Start Interview →</button>
+    <button class="btn btn-secondary" onclick="goTo('screen-lang')">← Back</button>
+  </div>
+</div>
+
+<!-- ───── SCREEN 2: INSTRUCTIONS ───── -->
+<div class="screen" id="screen-instructions">
+  <div style="margin-bottom:32px;">
+    <h2 id="instr-greeting">Ready to begin?</h2>
+    <p class="subtitle">Here's how the interview works:</p>
+  </div>
+
+  <ul class="instruction-list">
+    <li>
+      <div class="inst-num">1</div>
+      <div class="inst-text"><strong>Listen carefully</strong> — I will ask you questions. Wait until I finish speaking.</div>
+    </li>
+    <li>
+      <div class="inst-num">2</div>
+      <div class="inst-text"><strong>Tap the mic button</strong> to start your answer. Tap again when done.</div>
+    </li>
+    <li>
+      <div class="inst-num">3</div>
+      <div class="inst-text"><strong>Speak clearly</strong> in <span id="instr-lang">your language</span>. Take your time.</div>
+    </li>
+    <li>
+      <div class="inst-num">4</div>
+      <div class="inst-text"><strong>About 7 questions</strong> — the interview takes 10–15 minutes.</div>
+    </li>
+    <li>
+      <div class="inst-num">5</div>
+      <div class="inst-text"><strong>Find a quiet place</strong> with good internet before starting.</div>
+    </li>
+  </ul>
+
+  <div class="mt-auto flex-col gap-12" style="padding-top:24px;">
+    <button class="btn btn-primary" onclick="startInterview()">Begin Interview →</button>
+    <button class="btn btn-secondary" onclick="goTo('screen-info')">← Back</button>
+  </div>
+</div>
+
+<!-- ───── SCREEN 3: INTERVIEW ───── -->
+<div class="screen" id="screen-interview">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+  <div class="q-counter" id="q-counter">Question 1 of 7</div>
+
+  <div style="margin-bottom:16px;">
+    <div class="speaker-state" id="speaker-state" style="display:none;">
+      <div class="speaker-dot"></div>
+      <span id="speaker-state-text">Speaking...</span>
+    </div>
+    <div class="ai-bubble" id="ai-bubble">
+      <div class="think-dot"></div>
+      <div class="think-dot"></div>
+      <div class="think-dot"></div>
+    </div>
+  </div>
+
+  <div class="user-response-area" id="response-area" style="display:none;">
+    <div class="transcript-text" id="transcript-display"></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="mic-container">
+    <button class="mic-btn disabled" id="mic-btn" onclick="toggleMic()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
+    <div class="mic-label" id="mic-label">Waiting...</div>
+  </div>
+</div>
+
+<!-- ───── SCREEN 4: PROCESSING ───── -->
+<div class="screen" id="screen-processing">
+  <div class="spinner"></div>
+  <h2>Analysing your responses</h2>
+  <p style="color:var(--text-secondary); font-size:15px;">This will take just a moment...</p>
+</div>
+
+<!-- ───── SCREEN 5: COMPLETE ───── -->
+<div class="screen" id="screen-complete">
+  <div class="complete-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <h2>Interview Complete!</h2>
+  <p style="color:var(--text-secondary); font-size:15px; line-height:1.7; margin-top:8px;">
+    Thank you, <strong id="complete-name" style="color:var(--text);">Candidate</strong>.<br>
+    Our team will review your interview and contact you within <strong style="color:var(--text);">2 working days</strong>.
+  </p>
+  <div class="ref-id" id="ref-id">REF: INV-000000</div>
+</div>
+
+<!-- ───── ERROR TOAST ───── -->
+<div id="error-toast">⚠ Something went wrong</div>
+
+</div><!-- .app -->
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG — Edit these values before deploying
+// ═══════════════════════════════════════════════
+const CONFIG = {
+  geminiApiKey: 'AIzaSyB1TI_OsayJoJWD4Dqn0q4cYWnefYAfKHQ',                   // ← Paste your Gemini API key here
+  companyName: 'PhonePe',         // ← Your company name
+  jobTitle: 'Business Development Associate',  // ← Job role being interviewed for
+  maxQuestions: 7,                    // ← How many questions to ask
+  webhookUrl: '',                     // ← Optional: Google Apps Script URL to save results
+  scoringRubric: `
+    - communication (1-5): Clarity, coherence and articulation of answers
+    - experience (1-5): Relevant work history and skills mentioned
+    - motivation (1-5): Enthusiasm, energy and commitment to the role
+    - reliability (1-5): Signals of dependability, punctuality and seriousness
+  `
+};
+// ═══════════════════════════════════════════════
+
+// State
+const state = {
+  language: null,
+  candidate: {},
+  conversation: [],
+  scores: { communication: 0, experience: 0, motivation: 0, reliability: 0 },
+  questionCount: 0,
+  isListening: false,
+  isSpeaking: false,
+  interviewId: null,
+  recognition: null,
+  finalTranscript: '',
+};
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('company-name-display').textContent = CONFIG.companyName;
+  document.getElementById('company-name-display2').textContent = CONFIG.companyName;
+  document.getElementById('job-title-display').textContent = CONFIG.jobTitle;
+  if (!CONFIG.geminiApiKey) {
+    document.getElementById('setup-notice').classList.remove('hidden');
+  }
+  if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    showError('Please open this page in Google Chrome for voice support.');
+  }
+});
+
+// ── NAVIGATION ──
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── LANGUAGE SELECT ──
+function selectLanguage(code, english, native) {
+  state.language = { code, english, native };
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  const btn = document.getElementById('lang-next-btn');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  btn.style.cursor = 'pointer';
+}
+
+// ── CANDIDATE INFO ──
+function submitInfo() {
+  const name = document.getElementById('inp-name').value.trim();
+  const phone = document.getElementById('inp-phone').value.trim();
+  const jobCode = document.getElementById('inp-jobcode').value.trim();
+  if (!name) { showError('Please enter your name.'); return; }
+  if (!phone || phone.length < 10) { showError('Please enter a valid phone number.'); return; }
+  state.candidate = { name, phone, jobCode: jobCode || 'GENERAL' };
+  state.interviewId = 'INV-' + Date.now().toString().slice(-8);
+  document.getElementById('instr-greeting').textContent = `Ready, ${name.split(' ')[0]}?`;
+  document.getElementById('instr-lang').textContent = state.language ? state.language.english : 'your language';
+  document.getElementById('complete-name').textContent = name.split(' ')[0];
+  document.getElementById('ref-id').textContent = 'REF: ' + state.interviewId;
+  goTo('screen-instructions');
+}
+
+// ── START INTERVIEW ──
+async function startInterview() {
+  if (!CONFIG.geminiApiKey) { showError('Gemini API key not configured. See setup guide.'); return; }
+  goTo('screen-interview');
+  await firstTurn();
+}
+
+// ── GEMINI API ──
+function buildSystemPrompt() {
+  return `You are a warm, professional recruitment interviewer for ${CONFIG.companyName}.
+You are screening a candidate for: ${CONFIG.jobTitle}.
+
+CANDIDATE: ${state.candidate.name} (Phone: ${state.candidate.phone}, Code: ${state.candidate.jobCode})
+INTERVIEW LANGUAGE: ${state.language.english} — Respond ONLY in ${state.language.english}.
+MAX QUESTIONS: ${CONFIG.maxQuestions}
+
+SCORING DIMENSIONS:
+${CONFIG.scoringRubric}
+
+INSTRUCTIONS:
+- Ask ONE question at a time. Be warm, patient, and encouraging.
+- Keep questions conversational and simple (many candidates have basic literacy).
+- Start with a warm greeting + first question.
+- Gradually increase depth: background → experience → role-specific → motivation → logistics.
+- Update scores cumulatively based on ALL answers so far.
+- After ${CONFIG.maxQuestions} questions OR when you have enough info, end the interview.
+
+ALWAYS respond with ONLY valid JSON, no markdown, no extra text:
+{
+  "message": "Your spoken response here (question or acknowledgement + next question)",
+  "scores": {"communication": 1, "experience": 1, "motivation": 1, "reliability": 1},
+  "is_complete": false,
+  "recommendation": null,
+  "question_number": 1
+}
+
+When done: set is_complete=true and recommendation to exactly "hire", "consider", or "reject".`;
+}
+
+async function callGemini(userMessage) {
+  if (userMessage) {
+    state.conversation.push({ role: 'user', content: userMessage });
+  }
+
+  const contents = state.conversation.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  if (userMessage) {
+    // already added above
+  } else {
+    // First call — start the conversation
+    contents.push({ role: 'user', parts: [{ text: 'Start the interview.' }] });
+  }
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.geminiApiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: buildSystemPrompt() }] },
+        contents,
+        generationConfig: { temperature: 0.75, maxOutputTokens: 600 }
+      })
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+  const parsed = JSON.parse(raw);
+  state.conversation.push({ role: 'assistant', content: raw });
+  return parsed;
+}
+
+// ── VOICE LOOP ──
+async function firstTurn() {
+  setBubbleThinking();
+  try {
+    const resp = await callGemini(null);
+    state.scores = { ...state.scores, ...resp.scores };
+    state.questionCount = resp.question_number || 1;
+    updateProgress();
+    await speakAndWait(resp.message);
+    enableMic();
+  } catch (e) {
+    showError('Could not start interview: ' + e.message);
+    console.error(e);
+  }
+}
+
+async function handleUserAnswer(transcript) {
+  showTranscript(transcript);
+  disableMic('Thinking...');
+  setBubbleThinking();
+  hideSpeakerState();
+
+  try {
+    const resp = await callGemini(transcript);
+    state.scores = { ...resp.scores };
+    state.questionCount = resp.question_number || state.questionCount;
+    updateProgress();
+
+    if (resp.is_complete) {
+      await speakAndWait(resp.message);
+      await finishInterview(resp.recommendation);
+    } else {
+      await speakAndWait(resp.message);
+      enableMic();
+    }
+  } catch (e) {
+    showError('Connection error. Tap mic to try again.');
+    enableMic();
+    console.error(e);
+  }
+}
+
+async function finishInterview(recommendation) {
+  goTo('screen-processing');
+  await saveResult(recommendation);
+  setTimeout(() => goTo('screen-complete'), 1500);
+}
+
+// ── SPEECH SYNTHESIS ──
+function speakAndWait(text) {
+  return new Promise((resolve) => {
+    window.speechSynthesis.cancel();
+    setBubbleText(text);
+    showSpeakerState('Speaking...');
+    disableMic('Listening...');
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = state.language.code;
+    utter.rate = 0.88;
+    utter.pitch = 1.0;
+
+    // Pick a voice matching the language if available
+    const voices = window.speechSynthesis.getVoices();
+    const match = voices.find(v => v.lang.startsWith(state.language.code.slice(0,2)));
+    if (match) utter.voice = match;
+
+    utter.onend = () => { hideSpeakerState(); resolve(); };
+    utter.onerror = () => { hideSpeakerState(); resolve(); };
+    window.speechSynthesis.speak(utter);
+
+    // Chrome bug: synthesis sometimes hangs. Watchdog:
+    setTimeout(() => {
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        resolve();
+      }
+    }, 30000);
+  });
+}
+
+// ── SPEECH RECOGNITION ──
+function enableMic() {
+  const btn = document.getElementById('mic-btn');
+  const lbl = document.getElementById('mic-label');
+  btn.classList.remove('disabled', 'listening');
+  lbl.textContent = 'Tap to speak';
+  state.isListening = false;
+}
+
+function disableMic(label) {
+  const btn = document.getElementById('mic-btn');
+  const lbl = document.getElementById('mic-label');
+  btn.classList.add('disabled');
+  btn.classList.remove('listening');
+  lbl.textContent = label || 'Please wait...';
+}
+
+function toggleMic() {
+  if (state.isListening) {
+    stopListening();
+  } else {
+    startListening();
+  }
+}
+
+function startListening() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) { showError('Use Google Chrome for voice support.'); return; }
+
+  state.recognition = new SpeechRec();
+  state.recognition.lang = state.language.code;
+  state.recognition.continuous = false;
+  state.recognition.interimResults = true;
+  state.finalTranscript = '';
+
+  const btn = document.getElementById('mic-btn');
+  const lbl = document.getElementById('mic-label');
+  const respArea = document.getElementById('response-area');
+  const transcriptEl = document.getElementById('transcript-display');
+
+  btn.classList.add('listening');
+  lbl.textContent = 'Listening... tap to stop';
+  state.isListening = true;
+  respArea.style.display = 'block';
+  transcriptEl.textContent = '...';
+
+  state.recognition.onresult = (e) => {
+    let interim = '';
+    state.finalTranscript = '';
+    for (let i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) state.finalTranscript += e.results[i][0].transcript + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    transcriptEl.textContent = state.finalTranscript || interim || '...';
+  };
+
+  state.recognition.onend = () => {
+    state.isListening = false;
+    const text = state.finalTranscript.trim();
+    if (text.length > 1) {
+      handleUserAnswer(text);
+    } else {
+      enableMic();
+      document.getElementById('response-area').style.display = 'none';
+      showError('No speech detected. Please try again.');
+    }
+  };
+
+  state.recognition.onerror = (e) => {
+    state.isListening = false;
+    enableMic();
+    if (e.error !== 'aborted') showError('Mic error: ' + e.error + '. Try again.');
+  };
+
+  state.recognition.start();
+}
+
+function stopListening() {
+  if (state.recognition) state.recognition.stop();
+}
+
+// ── UI HELPERS ──
+function setBubbleThinking() {
+  const bubble = document.getElementById('ai-bubble');
+  bubble.classList.add('thinking');
+  bubble.innerHTML = '<div class="think-dot"></div><div class="think-dot"></div><div class="think-dot"></div>';
+}
+
+function setBubbleText(text) {
+  const bubble = document.getElementById('ai-bubble');
+  bubble.classList.remove('thinking');
+  bubble.textContent = text;
+}
+
+function showTranscript(text) {
+  const area = document.getElementById('response-area');
+  const el = document.getElementById('transcript-display');
+  area.style.display = 'block';
+  el.textContent = text;
+}
+
+function showSpeakerState(text) {
+  const el = document.getElementById('speaker-state');
+  el.style.display = 'flex';
+  document.getElementById('speaker-state-text').textContent = text;
+}
+
+function hideSpeakerState() {
+  document.getElementById('speaker-state').style.display = 'none';
+}
+
+function updateProgress() {
+  const pct = Math.min((state.questionCount / CONFIG.maxQuestions) * 100, 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-counter').textContent =
+    `Question ${state.questionCount} of ${CONFIG.maxQuestions}`;
+}
+
+// ── SAVE RESULT ──
+async function saveResult(recommendation) {
+  const result = {
+    id: state.interviewId,
+    timestamp: new Date().toISOString(),
+    candidate: state.candidate,
+    language: state.language.english,
+    scores: state.scores,
+    totalScore: Object.values(state.scores).reduce((a, b) => a + b, 0),
+    recommendation: recommendation || 'consider',
+    transcript: state.conversation,
+  };
+
+  // Save to localStorage
+  try {
+    const existing = JSON.parse(localStorage.getItem('interview_results') || '[]');
+    existing.push(result);
+    localStorage.setItem('interview_results', JSON.stringify(existing));
+  } catch (e) { console.warn('localStorage save failed:', e); }
+
+  // POST to webhook if configured
+  if (CONFIG.webhookUrl) {
+    try {
+      await fetch(CONFIG.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(result),
+        mode: 'no-cors'
+      });
+    } catch (e) { console.warn('Webhook POST failed:', e); }
+  }
+}
+
+// ── ERROR TOAST ──
+function showError(msg) {
+  const toast = document.getElementById('error-toast');
+  toast.textContent = '⚠ ' + msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
