@@ -517,7 +517,7 @@ input::placeholder { color:var(--text-muted); }
     <div class="progress-bar-fill" id="progress-fill"></div>
   </div>
   <div class="q-counter" id="q-counter">Question 1 of 7</div>
-
+mi
   <div style="margin-bottom:16px;">
     <div class="speaker-state" id="speaker-state" style="display:none;">
       <div class="speaker-dot"></div>
@@ -713,7 +713,7 @@ async function callGemini(userMessage) {
   }
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.geminiApiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${CONFIG.geminiApiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
